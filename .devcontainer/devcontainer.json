@@ -1,0 +1,21 @@
+//devcontainer.json
+{
+	"name": "Node.js Sample",
+	"dockerFile": "Dockerfile",
+  
+	"customizations": {
+	  "vscode": {
+		"settings": {
+		  "terminal.integrated.defaultProfile.linux": "bash"
+		},
+  
+		"extensions": ["dbaeumer.vscode-eslint"]
+	  }
+	},
+  
+	"forwardPorts": [3000],
+  
+	"postCreateCommand": "pnpm i && pnpm run dev",
+  
+	"remoteUser": "node"
+  }

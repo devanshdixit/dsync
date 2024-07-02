@@ -1,4 +1,3 @@
-import { DocumentNode } from "graphql";
 import { MouseEventHandler } from "react";
 
 export type AppProps = {
@@ -52,6 +51,7 @@ export declare interface ButtonProps {
   onSubmit?: any;
   disabled?: boolean;
   type?: "button" | "submit" | "reset" | undefined;
+  loading?: boolean;
 }
 
 export declare interface Input {

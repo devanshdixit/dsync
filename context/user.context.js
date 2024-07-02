@@ -1,18 +1,11 @@
 import { useRouter } from "next/router";
 import { createContext, useEffect, useState } from "react";
-import * as Realm from "realm-web";
-import { useAccount, useConnect } from "wagmi";
-const {
-    BSON: { ObjectId },
-} = Realm;
 import { notification } from 'antd';
 import { async } from "@firebase/util";
 import axios from "axios";
 import { makeHasuraAdminRequest } from "../config/fetch-requests";
 import { createUser, getUser, getUserByWalletId } from "../utils/queries";
 
-// Creating a Realm App Instance
-const app = new Realm.App({ id: process.env.NEXT_PUBLIC_MONGO_APP_ID || "" });
 
 // Creating a user context to manage and access all the user related functions
 // across different components and pages.
@@ -67,24 +60,24 @@ export const UserProvider = ({ children }) => {
     //         throw error;
     //     }
     // };
-    const { connector: activeConnector, isConnected, address } = useAccount({
-        async onConnect({ address, connector, isReconnected }) {
-            setWallet(address);
-            if (user) {
-                if (address !== user.walletAddress) {
-                    console.log("wallet address changed");
-                    await checkUserWallet(address);
-                }
-            }
-            if (!user && address) {
-                await checkUserWallet(address);
-            }
-        },
-        async onDisconnect() {
-            console.log('Disconnected')
-            logOutUser();
-        },
-    })
+    // const { connector: activeConnector, isConnected, address } = useAccount({
+    //     async onConnect({ address, connector, isReconnected }) {
+    //         setWallet(address);
+    //         if (user) {
+    //             if (address !== user.walletAddress) {
+    //                 console.log("wallet address changed");
+    //                 await checkUserWallet(address);
+    //             }
+    //         }
+    //         if (!user && address) {
+    //             await checkUserWallet(address);
+    //         }
+    //     },
+    //     async onDisconnect() {
+    //         console.log('Disconnected')
+    //         logOutUser();
+    //     },
+    // })
     // Function to fetch the user (if the user is already logged in) from local storage
     const fetchUser = async () => {
         if (!app?.currentUser) return false;

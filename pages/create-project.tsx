@@ -15,13 +15,11 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../config/firebase";
 import dynamic from 'next/dynamic';
 import congo from "../public/images/congo2.json";
-import { pageBottomToTop } from "../components/Animations/PageSwitch";
-
-import Error from "../components/Error";
 import AnimateWrapper from "../components/Animations/Wrappers/AnimateWrapper";
-import { makeHasuraAdminRequest } from "../config/fetch-requests";
 import { createProjectQuery, getProjectByName } from "../utils/queries";
 import InfoWarning from "../components/InfoWarning";
+import { useSelector } from "react-redux";
+import { makeHasuraAdminRequest } from "../config/fetch-requests";
 const Lottie = dynamic(() => import('react-lottie'), { ssr: false });
 
 export default function Createproject() {
@@ -40,10 +38,10 @@ export default function Createproject() {
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const { user, createProject } = useContext(UserContext);
+  const user = useSelector((state:any) => state?.user?.id);
   const router = useRouter();
   const antIcon = (
-    <LoadingOutlined style={{ fontSize: 20, color: "black" }} spin rev={undefined} />
+    <LoadingOutlined style={{ fontSize: 20, color: "black" }} spin />
   );
   const onImageChange = (e: any) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -187,7 +185,7 @@ export default function Createproject() {
                   logo: downloadURL,
                   status: "published",
                   chats: [],
-                  createdBy: user.id,
+                  createdBy: user,
                 };
                 console.log(formValues);
                 const response = await makeHasuraAdminRequest(
@@ -227,7 +225,7 @@ export default function Createproject() {
           ...form,
           status: "published",
           chats: [],
-          createdBy: user.id,
+          createdBy: user,
         };
         console.log(formValues);
 

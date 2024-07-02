@@ -1,4 +1,3 @@
-
 import axios, { all } from "axios";
 import { Spin } from "antd";
 import classNames from "classnames";
@@ -21,6 +20,7 @@ import Error from "../Error";
 import InfoWarning from "../InfoWarning";
 import { makeHasuraAdminRequest } from "../../config/fetch-requests";
 import { getTaskByStatus } from "../../utils/queries";
+import { useSelector } from "react-redux";
 
 const KanbanCardSection: FC<KanbanCardSectionProps> = ({
   title,
@@ -29,7 +29,7 @@ const KanbanCardSection: FC<KanbanCardSectionProps> = ({
   query,
   isManager,
 }) => {
-  const { user } = useContext(UserContext);
+  const user = useSelector((state: any) => state?.user?.id);
   const [createNewTask, setCreateNewTask] = useState(false);
   const [tasks, setTasks] = useState<TaskCardProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -59,8 +59,7 @@ const KanbanCardSection: FC<KanbanCardSectionProps> = ({
   // });
 
   useEffect(() => {
-    const intervalId = setInterval(async () => {
-      //assign interval to a variable to clear it.
+    const fetchData = async () => {
       console.log("project data intevaal", { projectDetails });
       let status = title;
       if (status === "All") {
@@ -78,8 +77,11 @@ const KanbanCardSection: FC<KanbanCardSectionProps> = ({
           },
         });
         if (draft?.errors || staked?.errors) {
+          setIsLoading(false);
           return;
         }
+        console.log(draft, staked);
+
         const alllist: any[] = [
           ...draft?.data?.asyncnewui_task,
           ...staked?.data?.asyncnewui_task,
@@ -107,8 +109,8 @@ const KanbanCardSection: FC<KanbanCardSectionProps> = ({
             });
           });
       }
-    }, 20000);
-    return () => clearInterval(intervalId);
+    };
+    fetchData();
   }, []);
 
   return (
@@ -126,7 +128,7 @@ const KanbanCardSection: FC<KanbanCardSectionProps> = ({
       </div>
       {/* Displaying the create button <-- start --> */}
       {(title === "Staked" || title === "Draft" || title === "All") &&
-        projectDetails?.createdBy === user?.id.toString() && (
+        projectDetails?.createdBy === user?.toString() && (
           <>
             <div
               className="px-[54px] py-2 flex gap-4 items-center text-[#A9FF1C] border-[1px] border-[#A9FF1C] mx-2 mb-4"
@@ -163,7 +165,7 @@ const KanbanCardSection: FC<KanbanCardSectionProps> = ({
                   {(title === "All" || title === "Staked") && (
                     <div
                       className={`flex flex-col justify-center items-center ${
-                        projectDetails?.createdBy === user?.id.toString()
+                        projectDetails?.createdBy === user?.toString()
                           ? "mt-[140px]"
                           : "mt-[180px]"
                       }`}

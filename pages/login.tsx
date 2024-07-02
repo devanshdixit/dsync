@@ -7,13 +7,11 @@ import Signin from "../components/Pages/Login/Signin";
 import ResetPassword from "../components/Pages/Login/ResetPassword";
 import ForgotPassword from "../components/Pages/Login/ForgotPassword";
 import Main from "../components/Pages/Login/MainComp";
-import { pageBottomToTop } from "../components/Animations/PageSwitch";
-import { motion } from "framer-motion";
 import AnimateWrapper from "../components/Animations/Wrappers/AnimateWrapper";
 export default function Home() {
   const [comp, setComponent] = useState<
     "main" | "signup" | "signin" | "forgotpass" | "resetPass" | "otp" | "login"
-  >("main");
+  >("signin");
   const [showpas, setShowpas] = useState<boolean>(true);
   const [showre, setShowre] = useState<boolean>(true);
   const [nextStep, setNextStep] = useState<boolean>(true);

@@ -2,10 +2,12 @@ import { BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
 import { FC, useContext, useState } from "react";
 import Input from "../../../Forms/Input";
 import Button from "../../../Forms/Button";
-import { UserContext } from "../../../../context/user.context";
 import { useRouter } from "next/router";
 import { validateEmail } from "../../../../utils/validateEmail";
 import GoBack from "../../../Goback";
+import { useDispatch } from "react-redux";
+import axios from "axios";
+import { setUser } from "../../../../store/userSlice";
 
 interface SigninProps {
   showre: boolean;
@@ -22,9 +24,10 @@ const Signin: FC<SigninProps> = ({
   setShowre: Function;
   setComponent: Function;
 }) => {
-  const { user, fetchUser, emailPasswordLogin } = useContext(UserContext);
   const router = useRouter();
   const redirectUrl: any = router?.query?.redirect || "";
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState({
     isError: false,
     message: "",
@@ -60,17 +63,29 @@ const Signin: FC<SigninProps> = ({
       setError({ isError: true, message: "Enter valid email!" });
       return;
     }
+    if (isLoading) {
+      return;
+    }
+    setIsLoading(true);
     try {
-      const user = await emailPasswordLogin(form.email, form.password);
-      if (user) {
-        if (redirectUrl !== "") {
+      const response = await axios.post('/api/login', {
+        email: form.email,
+        password: form.password,
+      });
+      if (response.status === 200) {
+        const { token, user } = response.data;
+        dispatch(setUser({ ...user, token }));
+        localStorage.setItem('token', token);
+        setIsLoading(false);
+        if (redirectUrl !== '') {
           redirectNow(redirectUrl);
         } else {
-          redirectNow("/");
+          redirectNow('/');
         }
       }
     } catch (error) {
       const { statusCode }: any = error;
+      setIsLoading(false);
       if (statusCode === 401) {
         setError({
           isError: true,
@@ -139,6 +154,7 @@ const Signin: FC<SigninProps> = ({
           title="Login"
           type="submit"
           onClick={onSubmit}
+          loading={isLoading}
           className="px-4 py-2 bg-[#A9FF1C] text-black text-base font-[600]"
         />
       </form>

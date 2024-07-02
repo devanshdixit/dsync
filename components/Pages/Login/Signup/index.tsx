@@ -2,12 +2,15 @@ import { BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
 import { Dispatch, SetStateAction, useContext, useState } from "react";
 import Input from "../../../Forms/Input";
 import Button from "../../../Forms/Button";
-import { UserContext } from "../../../../context/user.context";
 import { useRouter } from "next/router";
 import { validateEmail } from "../../../../utils/validateEmail";
 import GoBack from "../../../Goback";
 import { MdDone } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
+import { makeHasuraAdminRequest } from "../../../../config/fetch-requests";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../../../store/userSlice";
 
 const Signup = ({
   showre,
@@ -32,12 +35,12 @@ const Signup = ({
     >
   >;
 }) => {
-  const { emailPasswordSignup } = useContext(UserContext);
   const router = useRouter();
   const [error, setError] = useState({
     isError: false,
     message: "",
   });
+  const dispatch = useDispatch();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -49,9 +52,6 @@ const Signup = ({
     setForm({ ...form, [name]: value });
   };
 
-  const redirectNow = (path: string) => {
-    router.push(path);
-  };
 
   const onSubmit = async (event: any) => {
     event.preventDefault();
@@ -74,13 +74,17 @@ const Signup = ({
       return;
     }
     try {
-      const user = await emailPasswordSignup(
-        form.email,
-        form.password,
-        form.name
-      );
-      if (user) {
-        redirectNow("/");
+      // Make API call to login
+      const response = await axios.post('/api/register', {
+        email: form.email,
+        password: form.password,
+        fullName: form.name,
+      });
+      if (response.status === 200) {
+        const { token, user } = response.data;
+        dispatch(setUser({ ...user, token }));
+        localStorage.setItem('token', token);
+        router.replace("/");
       }
     } catch (error) {
       console.log("error:", error);
@@ -176,24 +180,20 @@ const Signup = ({
               </div>
               <div className="flex gap-[10px] my-[10px]">
                 <div
-                  className={`h-[2px] w-[50px] ${
-                    low && up ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
-                  } `}
+                  className={`h-[2px] w-[50px] ${low && up ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
+                    } `}
                 />
                 <div
-                  className={`h-[2px] w-[50px] ${
-                    number ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
-                  } `}
+                  className={`h-[2px] w-[50px] ${number ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
+                    } `}
                 />
                 <div
-                  className={`h-[2px] w-[50px] ${
-                    symbol ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
-                  } `}
+                  className={`h-[2px] w-[50px] ${symbol ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
+                    } `}
                 />
                 <div
-                  className={`h-[2px] w-[50px] ${
-                    len ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
-                  } `}
+                  className={`h-[2px] w-[50px] ${len ? "bg-[#80ED5D]" : "bg-[#3D3D3D]"
+                    } `}
                 />
               </div>
               <div className="mb-[10px] text-[#858585] text-[14px] font-[400] font-Inter">
@@ -283,9 +283,9 @@ const Signup = ({
         </div>
 
         {form.password !== "" &&
-        form.confirmPassword !== "" &&
-        form.name !== "" &&
-        form.email !== "" ? (
+          form.confirmPassword !== "" &&
+          form.name !== "" &&
+          form.email !== "" ? (
           <Button
             title="Create Account"
             onClick={onSubmit}

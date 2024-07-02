@@ -7,6 +7,7 @@ import { BsCheck2, BsChevronDown, BsSearch } from "react-icons/bs";
 import { RiErrorWarningLine } from "react-icons/ri";
 import { UserContext } from "../../context/user.context";
 import SharePopUP from "../SharePopUp";
+import { useSelector } from "react-redux";
 
 interface projects {
   project: any;
@@ -16,7 +17,7 @@ interface projects {
 const ProjectDetails: FC<projects> = ({ project, activity }) => {
   const [active, setActive] = useState("about");
   const [hide, setHide] = useState(false);
-  const { user } = useContext(UserContext);
+  const user = useSelector((state:any)=> state?.user?.id);
   const [showEditDesc, setShowEditDesc] = useState<boolean>(true);
   const [isManager, setIsManager] = useState<boolean>(false);
   const [description, setDescription] = useState("");
@@ -27,7 +28,7 @@ const ProjectDetails: FC<projects> = ({ project, activity }) => {
     notification.info({ message: "Copied to clipboard" });
   };
   useEffect(() => {
-    if (user?.id?.toString() === project?.createdBy) {
+    if (user?.toString() === project?.createdBy) {
       setIsManager(true);
     }
   }, []);

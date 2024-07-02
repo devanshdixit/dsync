@@ -7,26 +7,16 @@ import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../context/user.context";
 import { appConfig } from "../../config/appConfig";
-import { useAccount, useDisconnect, useNetwork, useSwitchNetwork } from "wagmi";
 import { useRouter } from "next/router";
 import { notification } from "antd";
-import contractConfig from "../../config/smartContracts/contractConfigs";
 import { FaChevronDown } from "react-icons/fa";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import WalletConnect from "../WalletConnect";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../store/userSlice";
 
 const Header = () => {
-  const { user, logOutUser } = useContext(UserContext);
   const router = useRouter();
   const [iswalletConnected, setIswalletConnected] = useState(false);
-  useEffect(() => {
-    if (user) {
-      setIswalletConnected(true);
-    } else {
-      setIswalletConnected(false);
-    }
-  }, [user]);
-
+  const user = useSelector((state: any) => state?.user?.id);
   return (
     <div className="bg-[#0C0C0E] py-[21px] flex justify-between items-center md:justify-between lg:justify-between xl:justify-between  largeLaptop:justify-evenly   px-[24px] text-white sticky top-0 z-10">
       <div className="flex gap-[48px] text-white text-[16px] font-[400] items-center">
@@ -45,12 +35,12 @@ const Header = () => {
         <div className="flex gap-[12px] items-center">
           For Project Manager <BsChevronDown />
         </div>
-        <div>News</div> */}
-        {/* <div className="hidden md:block cursor-pointer">My Projects</div> */}
+        <div>News</div>
+        <div className="hidden md:block cursor-pointer">My Projects</div> */}
       </div>
-      <WalletConnect />
-      {/* <div className="flex justify-center items-center gap-[5px]">
-        {!iswalletConnected && (
+      {/* <WalletConnect /> */}
+      <div className="flex justify-center items-center gap-[5px]">
+        {!user && (
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -66,9 +56,9 @@ const Header = () => {
             Login
           </button>
         )}
-        {iswalletConnected && <LogedInView user={user} />}
+        {user && <LogedInView user={user} />}
         {/* three dots view */}
-      {/*  {!iswalletConnected ? (
+        {!user ? (
           <div className="dropdown dropdown-bottom dropdown-end block md:hidden">
             <label tabIndex={0} className=" bg-[#0C0C0E]">
               <GiHamburgerMenu className="md:hidden block text-white h-6 w-6" />
@@ -118,63 +108,60 @@ const Header = () => {
             Create Project
           </button>
         </Link>
-      </div> */}
+      </div>
     </div>
   );
 };
 
 export default Header;
 
-const NetworkInfo = () => {
-  const { chain, chains } = useNetwork();
-  useEffect(() => {
-    console.log({ chain, chains });
-  }, []);
-  const { switchNetwork } = useSwitchNetwork();
-  return (
-    <>
-      {chain && (
-        <div className="dropdown dropdown-bottom dropdown-end">
-          <div className="text-white">
-            {chain.name === contractConfig.network.testnet.name ? (
-              <Image
-                src="https://polygonscan.com/token/images/matic_32.png"
-                width={24}
-                height={24}
-                alt="polygon"
-                onClick={(e: any) => {
-                  e.preventDefault();
-                  notification.info({ message: "Polygon Network" });
-                }}
-              />
-            ) : (
-              <p
-                onClick={(e: any) => {
-                  e.preventDefault();
-                  switchNetwork?.(contractConfig.network.testnet.id);
-                }}
-                className="text-red-400 hover:cursor-pointer border-[1px] border-[#3D3D3D]  font-semibold text-[16px] p-2 rounded-lg flex justify-center items-center gap-2 btn"
-              >
-                Wrong Network
-                <FaChevronDown className="text-white " />
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
+// const NetworkInfo = () => {
+//   const { chain, chains } = useNetwork();
+//   useEffect(() => {
+//     console.log({ chain, chains });
+//   }, []);
+//   const { switchNetwork } = useSwitchNetwork();
+//   return (
+//     <>
+//       {chain && (
+//         <div className="dropdown dropdown-bottom dropdown-end">
+//           <div className="text-white">
+//             {chain.name === contractConfig.network.testnet.name ? (
+//               <Image
+//                 src="https://polygonscan.com/token/images/matic_32.png"
+//                 width={24}
+//                 height={24}
+//                 alt="polygon"
+//                 onClick={(e: any) => {
+//                   e.preventDefault();
+//                   notification.info({ message: "Polygon Network" });
+//                 }}
+//               />
+//             ) : (
+//               <p
+//                 onClick={(e: any) => {
+//                   e.preventDefault();
+//                   switchNetwork?.(contractConfig.network.testnet.id);
+//                 }}
+//                 className="text-red-400 hover:cursor-pointer border-[1px] border-[#3D3D3D]  font-semibold text-[16px] p-2 rounded-lg flex justify-center items-center gap-2 btn"
+//               >
+//                 Wrong Network
+//                 <FaChevronDown className="text-white " />
+//               </p>
+//             )}
+//           </div>
+//         </div>
+//       )}
+//     </>
+//   );
+// };
 
 const LogedInView = ({ user }: any) => {
-  const { logOutUser } = useContext(UserContext);
-  const { disconnect } = useDisconnect();
-  const { isConnected } = useAccount();
-
+  const dispatch = useDispatch();
   return (
     <div className="text-white flex items-center gap-[21px] mr-[20px]">
       <SlBell className="hidden md:block" />
-      <NetworkInfo />
+      {/* <NetworkInfo /> */}
       <div className="dropdown dropdown-bottom dropdown-end hidden md:block">
         <label tabIndex={0} className=" bg-[#0C0C0E]">
           <Image
@@ -195,23 +182,12 @@ const LogedInView = ({ user }: any) => {
             >
               Create Project
             </a>
-            {user?.provider === "wallet" && isConnected && (
-              <div
-                onClick={async (e) => {
-                  e.preventDefault();
-                  disconnect();
-                  logOutUser();
-                }}
-                className="w-[150px]"
-              >
-                Disconnect
-              </div>
-            )}
-            {user?.provider !== "wallet" && (
+            {user && (
               <div
                 onClick={(e) => {
                   e.preventDefault();
-                  logOutUser();
+                  localStorage.removeItem('token');
+                  dispatch(logout());
                 }}
                 className="w-[150px]"
               >

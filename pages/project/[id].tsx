@@ -18,11 +18,11 @@ import { IsError, Project } from "../../utils/types";
 import Error from "../../components/Error";
 import AnimateWrapper from "../../components/Animations/Wrappers/AnimateWrapper";
 import { makeHasuraAdminRequest } from "../../config/fetch-requests";
+import { useSelector } from "react-redux";
 
 const Home: NextPage = (props: any) => {
   const projectData = props?.projectData;
   const taskCreatedbyData = props?.taskCreatedbyData;
-  console.log(projectData,"projectData");
 
   const [project, setProject] = useState<Project>({
     logo: "",
@@ -32,7 +32,7 @@ const Home: NextPage = (props: any) => {
     category: "",
     chats: [],
   });
-  const { user } = useContext(UserContext);
+  const user = useSelector((state: any) => state?.user?.id);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isManager, setIsManager] = useState(false);
   const [isError, setIsError] = useState<IsError>({
@@ -41,10 +41,9 @@ const Home: NextPage = (props: any) => {
   });
 
   const antIcon = (
-    <LoadingOutlined style={{ fontSize: 20, color: "black" }} spin rev={undefined} />
+    <LoadingOutlined style={{ fontSize: 20, color: "black" }} spin />
   );
   useEffect(() => {
-    console.log(props);
     if (!user) {
       setIsLoading(false);
       setIsError({
@@ -68,7 +67,7 @@ const Home: NextPage = (props: any) => {
         created_at: projectData?.created_at || [],
       };
       setProject(data);
-      if (user?.id.toString() === projectData?.created_by) {
+      if (user.toString() === projectData?.created_by) {
         console.log("user is Manager");
         setIsManager(true);
       } else {
@@ -139,15 +138,14 @@ const Home: NextPage = (props: any) => {
                 </div>
                 <div className="overflow-scroll md:overflow-visible projectScroll  mt-4">
                   <div className="w-max md:w-auto flex gap-[8px] mb-[74px] md:mb-0 justify-center items-center  ml-[10px] md:mr-0 ">
-          
-                      <KanbanCardSection
-                        title="All"
-                        statusColor="#FFE81C"
-                        projectDetails={project}
-                        isManager={isManager}
-                        query=""
-                      />
-                    {/* {isManager && (
+                    {isManager && (<KanbanCardSection
+                      title="All"
+                      statusColor="#FFE81C"
+                      projectDetails={project}
+                      isManager={isManager}
+                      query=""
+                    />)}
+                    {!isManager && (
                       <KanbanCardSection
                         title="Staked"
                         isManager={isManager}
@@ -155,8 +153,8 @@ const Home: NextPage = (props: any) => {
                         projectDetails={project}
                         query=""
                       />
-                    )} */}
-                    {/* <KanbanCardSection
+                    )}
+                    <KanbanCardSection
                       query=""
                       title="Live"
                       statusColor="#2B59FF"
@@ -167,7 +165,7 @@ const Home: NextPage = (props: any) => {
                       title="Done"
                       statusColor="#80ED5D"
                       projectDetails={project}
-                    /> */}
+                    />
                     {/* {typeof window === undefined ? "" : <GeneralChat {...project} />} */}
                   </div>
                 </div>
@@ -196,8 +194,8 @@ export async function getServerSideProps(context: any) {
         projectId: id,
       },
     });
-    console.log(taskresp,resp);
-    
+    console.log(taskresp, resp);
+
     return {
       props: {
         projectData: JSON.parse(

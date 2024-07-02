@@ -9,8 +9,7 @@ import React, {
   useState,
 } from "react";
 import { IoIosClose } from "react-icons/io";
-import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
-import { UserContext } from "../../../../context/user.context";
+import Signin from "../Signin";
 
 const Main = ({
   setComponent,
@@ -27,30 +26,13 @@ const Main = ({
     >
   >;
 }) => {
-  const { user, logOutUser, checkUserWallet } = useContext(UserContext);
-  const { isConnected } = useAccount();
+  const user = null;
   const [walletdata, setWalletdata] = useState(null);
+  const [showre, setshowre] = useState(true);
   const [reConnectWalletConnector, setReConnectWalletConnector] =
     useState<any>(null);
   const router = useRouter();
   const redirectUrl: any = router?.query?.redirect || "";
-
-  const { connect, connectors, error, isLoading, pendingConnector, data } =
-    useConnect({
-      async onSuccess(data: any) {
-        // console.log("User connected Successfully");
-        // await checkUserWallet(data.account);
-        // setWalletdata(data);
-        // if (redirectUrl !== "") {
-        //   router.push(redirectUrl);
-        // }
-      },
-    });
-  const { signMessage } = useSignMessage({
-    async onSuccess() {},
-  });
-  const { disconnect } = useDisconnect();
-
   // useEffect(() => {
   //   disconnect();
   // }, [error]);
@@ -64,7 +46,9 @@ const Main = ({
         <div className="font-bold text-[14px] opacity-50 px-4 font-sans ">
           Popular
         </div>
-        {isConnected && user ? (
+
+        <Signin setComponent={()=>{}} setShowre={setshowre} showre={showre} />
+        {user ? (
           <div className="text-[18px] font-bold text-center font-sans flex justify-center text-[#8ACE19] items-center">
             User Already logged In! &nbsp;&nbsp;
             <Link
@@ -77,64 +61,6 @@ const Main = ({
           </div>
         ) : (
           <div>
-            {connectors.map((connector: any) => (
-              <button
-                disabled={!connector.ready}
-                key={connector.id}
-                className=" text-white w-full  text-[18px] h-[44px] text-center py-[10px] bg-transparent  flex justify-start items-center gap-[13px] font-sans hover:bg-[#2E3036] rounded-xl font-bold"
-                onClick={() => {
-                  setReConnectWalletConnector(connector);
-                  connect({ connector });
-                  if (redirectUrl !== "" && isConnected) {
-                    router.push(redirectUrl);
-                  }
-                }}
-              >
-                <div className="rounded-md  ml-4 ">
-                  {connector.name === "MetaMask" && (
-                    <Image
-                      className="rounded-md"
-                      src={"/icons/metamask.png"}
-                      alt="meta"
-                      height={30}
-                      width={30}
-                    />
-                  )}
-                  {connector.name === "Coinbase Wallet" && (
-                    <Image
-                      className="rounded-md"
-                      src={"/icons/coinbase.png"}
-                      alt="meta"
-                      height={30}
-                      width={30}
-                    />
-                  )}
-                  {connector.name === "WalletConnect" && (
-                    <Image
-                      className="rounded-md"
-                      src={"/icons/walletConnect.png"}
-                      alt="meta"
-                      height={30}
-                      width={30}
-                    />
-                  )}
-                </div>
-                {connector.name}
-                {!connector.ready && " (unsupported)"}
-                {isLoading &&
-                  connector.id === pendingConnector?.id &&
-                  "(connecting)"}
-              </button>
-            ))}
-
-            {error && (
-              <>
-                <p className="font-sans text-center mb-2">
-                  Please Reconnect Wallet!
-                </p>
-                <p className="font-sans text-center">{error.message}</p>
-              </>
-            )}
           </div>
         )}
         <div className="bg-[#2C2D31] rounded-full w-fit h-fit hover:scale-110 absolute right-[18px] top-[18px]">
